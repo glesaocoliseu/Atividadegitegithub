@@ -1,0 +1,110 @@
+<html>
+<head>
+<title>Fotos para moldura</title>
+
+<!-- CDN do jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+</head>
+<body>
+
+<h1>Fotos para moldura</h1>
+
+<input type="file" id="inputFile" accept="image/*" multiple>
+
+<img id="img1">
+<img id="img2">
+<img id="img3">
+<img id="img4">
+
+<br><br>
+
+<button onclick="mostrarImagem()">Mostrar imagens</button>
+<button onclick="gerarPDF()">Gerar PDF</button>
+
+<script>
+
+var img1 = document.getElementById("img1");
+var img2 = document.getElementById("img2");
+var img3 = document.getElementById("img3");
+var img4 = document.getElementById("img4");
+
+// posições na tela (preview)
+img1.style.cssText = "width:10cm;height:14cm;position:absolute;top:0.5cm;left:1cm;";
+img2.style.cssText = "width:10cm;height:14cm;position:absolute;top:0.5cm;left:11.2cm;";
+img3.style.cssText = "width:10cm;height:14cm;position:absolute;top:16.7cm;left:1cm;";
+img4.style.cssText = "width:10cm;height:14cm;position:absolute;top:16.7cm;left:11.2cm;";
+
+// carregar imagens
+function mostrarImagem() {
+    var input = document.getElementById("inputFile");
+    var files = input.files;
+
+    if (files[0]) img1.src = URL.createObjectURL(files[0]);
+    if (files[1]) img2.src = URL.createObjectURL(files[1]);
+    if (files[2]) img3.src = URL.createObjectURL(files[2]);
+    if (files[3]) img4.src = URL.createObjectURL(files[3]);
+}
+
+// converter imagem pra base64
+function toBase64(img) {
+    return new Promise((resolve) => {
+        if (!img.src) return resolve(null);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        resolve(canvas.toDataURL("image/png"));
+    });
+}
+
+// gerar PDF
+async function gerarPDF() {
+
+    const { jsPDF } = window.jspdf;
+
+    let pdf = new jsPDF({
+        orientation: "p",
+        unit: "cm",
+        format: "a4"
+    });
+
+    let largura = 10;
+    let altura = 14;
+
+    // posições FIXAS (igual ao layout)
+    let posicoes = [
+        {x: 1, y: 0.5},     // topo 0.5cm
+        {x: 11.2, y: 0.5},
+        {x: 1, y: 16.7},
+        {x: 11.2, y: 16.7}
+    ];
+
+    let imagens = [img1, img2, img3, img4];
+
+    for (let i = 0; i < imagens.length; i++) {
+        let base64 = await toBase64(imagens[i]);
+
+        if (base64) {
+            pdf.addImage(
+                base64,
+                "PNG",
+                posicoes[i].x,
+                posicoes[i].y,
+                largura,
+                altura
+            );
+        }
+    }
+
+    pdf.save("fotos.pdf");
+}
+
+</script>
+
+</body>
+</html>
