@@ -1,10 +1,113 @@
-
+```html
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Atividade de Git e Github</title>
+  <meta charset="UTF-8">
+  <title>Leitor de QR Code</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #reader {
+      width: 300px;
+      margin: 20px auto;
+      border: 2px solid #333;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      word-break: break-all;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #startBtn {
+      background: #28a745;
+      color: white;
+    }
+
+    #stopBtn {
+      background: #dc3545;
+      color: white;
+    }
+  </style>
 </head>
 <body>
-    <a href="fotosParaMoldura2.html">fotos para moldura</a>
+
+  <h1>📷 Leitor de QR Code</h1>
+
+  <div id="reader"></div>
+
+  <div>
+    <button id="startBtn">Iniciar</button>
+    <button id="stopBtn">Parar</button>
+  </div>
+
+  <div id="result">Resultado: nenhum</div>
+
+  <script>
+    let html5QrCode;
+    let cameraId;
+
+    function onScanSuccess(decodedText) {
+      document.getElementById("result").innerText = "Resultado: " + decodedText;
+    }
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      html5QrCode = new Html5Qrcode("reader");
+
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+          cameraId = devices[0].id;
+
+          html5QrCode.start(
+            cameraId,
+            {
+              fps: 10,
+              qrbox: 250
+            },
+            onScanSuccess
+          );
+        }
+      }).catch(err => {
+        alert("Erro ao acessar câmera: " + err);
+      });
+    });
+
+    document.getElementById("stopBtn").addEventListener("click", () => {
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+          document.getElementById("result").innerText = "Leitor parado.";
+        }).catch(err => {
+          console.error(err);
+        });
+      }
+    });
+  </script>
+
 </body>
 </html>
+```
